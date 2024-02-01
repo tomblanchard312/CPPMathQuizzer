@@ -1,5 +1,4 @@
 // CPPMathQuizzer.cpp : This file contains the 'main' function. Program execution begins and ends there.
-//
 
 #include <iostream>
 #include <fstream>
@@ -18,7 +17,6 @@ struct QuizAttempt {
     int attemptNumber;
     int correctAnswers;
     int totalQuestions;
-    chrono::system_clock::time_point attemptDate;
 };
 
 int generateRandomNumber(int min, int max) {
@@ -39,23 +37,6 @@ int multiplicationQuestion(int num1, int num2) {
 
 int divisionQuestion(int num1, int num2) {
     return num1 / num2;
-}
-
-int algebraQuestion(int num1, int num2, char operation) {
-    switch (operation) {
-    case '+':
-        return num1 + num2;
-    case '-':
-        return num1 - num2;
-    case '*':
-        return num1 * num2;
-    case '/':
-        // Avoid division by zero
-        num2 = (num2 != 0) ? num2 : 1;
-        return num1 / num2;
-    default:
-        return 0; // Invalid operation
-    }
 }
 
 void saveAttempt(const QuizAttempt& attempt) {
@@ -94,10 +75,23 @@ int main() {
         string line;
         while (getline(inFile, line)) {
             QuizAttempt attempt;
-            sscanf_s(line.c_str(), "%[^,],%d,%d,%d", attempt.userName, static_cast<unsigned>(sizeof(attempt.userName) - 1), &attempt.attemptNumber, &attempt.correctAnswers, &attempt.totalQuestions);
-            // Check if attemptNumber is non-negative, else set it to 1
-            attempt.attemptNumber = (attempt.attemptNumber >= 0) ? attempt.attemptNumber : 1;
-            quizAttempts.push_back(attempt);
+            size_t pos = line.find(',');
+
+            // Read the user name until the first comma
+            if (pos != string::npos) {
+                attempt.userName = line.substr(0, pos);
+                line = line.substr(pos + 1); // Move past the first comma
+            }
+
+            // Read the remaining fields directly
+            if (sscanf_s(line.c_str(), "%d,%d,%d", &attempt.attemptNumber, &attempt.correctAnswers, &attempt.totalQuestions) == 3) {
+                // Check if attemptNumber is non-negative, else set it to 1
+                attempt.attemptNumber = (attempt.attemptNumber >= 0) ? attempt.attemptNumber : 1;
+                quizAttempts.push_back(attempt);
+            }
+            else {
+                cerr << "Error reading attempt data." << endl;
+            }
         }
         inFile.close();
     }
@@ -114,7 +108,7 @@ int main() {
     do {
         // Welcome message
         cout << "Welcome to the Math Quiz Game!" << endl;
-        cout << "Test your math skills with addition, subtraction, multiplication, division, and basic algebra." << endl << endl;
+        cout << "Test your math skills with addition, subtraction, multiplication, and division." << endl << endl;
 
         // Set the number of questions
         const int numQuestions = 5;
@@ -126,12 +120,10 @@ int main() {
         cout << "2. Subtraction" << endl;
         cout << "3. Multiplication" << endl;
         cout << "4. Division" << endl;
-        cout << "5. Basic Algebra" << endl;
-        cout << "6. Random Operators" << endl;
 
         // Get the user's choice
-        while (!(cin >> choice) || choice < 1 || choice > 6) {
-            cout << "Invalid choice. Please enter a number between 1 and 6." << endl;
+        while (!(cin >> choice) || choice < 1 || choice > 4) {
+            cout << "Invalid choice. Please enter a number between 1 and 4." << endl;
             cin.clear();  // Clear the error flag
             cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');  // Discard invalid input
         }
@@ -164,38 +156,6 @@ int main() {
                 cout << "Question " << i << ": What is " << num1 << " / " << num2 << "? ";
                 result = divisionQuestion(num1, num2);
                 break;
-            case 5:
-                char algebraOperation;
-                cout << "Question " << i << ": What is " << num1 << " ? ";
-                cin >> algebraOperation;
-                cout << " " << algebraOperation << " " << num2 << "? ";
-                result = algebraQuestion(num1, num2, algebraOperation);
-                break;
-            case 6:
-                // Randomly choose an operator
-                int operatorChoice;
-                operatorChoice = generateRandomNumber(1, 4);
-                switch (operatorChoice) {
-                case 1:
-                    cout << "Question " << i << ": What is " << num1 << " + " << num2 << "? ";
-                    result = additionQuestion(num1, num2);
-                    break;
-                case 2:
-                    cout << "Question " << i << ": What is " << num1 << " - " << num2 << "? ";
-                    result = subtractionQuestion(num1, num2);
-                    break;
-                case 3:
-                    cout << "Question " << i << ": What is " << num1 << " * " << num2 << "? ";
-                    result = multiplicationQuestion(num1, num2);
-                    break;
-                case 4:
-                    // Avoid division by zero
-                    num2 = (num2 != 0) ? num2 : 1;
-                    cout << "Question " << i << ": What is " << num1 << " / " << num2 << "? ";
-                    result = divisionQuestion(num1, num2);
-                    break;
-                }
-                break;
             default:
                 cout << "Invalid choice. Exiting the program." << endl;
                 return 1;
@@ -223,7 +183,6 @@ int main() {
         currentAttempt.attemptNumber = attemptNumber;
         currentAttempt.correctAnswers = correctAnswers;
         currentAttempt.totalQuestions = numQuestions;
-        currentAttempt.attemptDate = chrono::system_clock::now();
 
         saveAttempt(currentAttempt);
 
