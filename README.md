@@ -11,13 +11,19 @@ Welcome to the Elementary Math Quiz Tool! This program allows users to test thei
 ## Getting Started
 
 1. **Clone the Repository:**
-   git clone https://github.com/tomblanchard312/CPPMathQuizzer.git  
-2. **Build the Project**
-  cd CPPMathQuizzer  
-  g++ -o CPPMathQuizzer CPPMathQuizzer.cpp  
-3. **Run Program**
-   ./CPPMathQuizzer  
-4. **Follow On-Screen Instructions:**
+2. ```
+   git clone https://github.com/tomblanchard312/CPPMathQuizzer.git
+   ```
+3. **Build the Project**
+```
+  cd CPPMathQuizzer
+  g++ -o CPPMathQuizzer CPPMathQuizzer.cpp
+```
+4. **Run Program**
+```
+   ./CPPMathQuizzer
+```
+5. **Follow On-Screen Instructions:**
     Enter your name.  
     Choose the type of operation (addition, subtraction, multiplication, or division).  
     Answer the quiz questions.
